@@ -9,12 +9,10 @@ Ghozali, Oct 2020
 Date : 2020 Oct 27
 """
 
-
+import time
 import httplib
 import json
 from Automonitor import Automonitor
-import time
-
 
 class flowStat(object):
     def __init__(self, server):
@@ -26,10 +24,7 @@ class flowStat(object):
 
     def rest_call(self, data, action, switch):
         path = '/wm/core/switch/'+switch+"/flow/json"
-        headers = {
-            'Content-type': 'application/json',
-            'Accept': 'application/json',
-            }
+        headers = {'Content-type': 'application/json','Accept': 'application/json'}
         body = json.dumps(data)
         conn = httplib.HTTPConnection(self.server, 8080)
         #print path
@@ -75,7 +70,8 @@ class StaticFlowPusher(object):
 
 pusher = StaticFlowPusher('127.0.0.1')
 flowget = flowStat('127.0.0.1')
-monitor = Automonitor(1.0)
+
+monitor = Automonitor(1)
                                
 def AutoRouting():
     switched = False

@@ -9,12 +9,10 @@ Ghozali, Oct 2020
 Date : 2020 Oct 27
 """
 
-
+import time
 import httplib
 import json
 from Automonitor import Automonitor
-import time
-
 
 class flowStat(object):
     def __init__(self, server):
@@ -26,10 +24,7 @@ class flowStat(object):
 
     def rest_call(self, data, action, switch):
         path = '/wm/core/switch/'+switch+"/flow/json"
-        headers = {
-            'Content-type': 'application/json',
-            'Accept': 'application/json',
-            }
+        headers = {'Content-type': 'application/json','Accept': 'application/json'}
         body = json.dumps(data)
         conn = httplib.HTTPConnection(self.server, 8080)
         conn.request(action, path, body, headers)
@@ -72,29 +67,23 @@ class StaticFlowPusher(object):
 
 pusher = StaticFlowPusher('127.0.0.1')
 flowget = flowStat('127.0.0.1')
-monitor = Automonitor(1.0)
+
+monitor = Automonitor(1)
                                
 def AutoRouting():
     switched = False
     while True:
         monitor.update_monitor(flowget)
-        tcp_throughput = monitor.get_stats(
-            "00:00:00:00:00:00:00:01", 
-            "tcp", 
-            "10.0.0.1",
-            "10.0.0.3"
-            )["throughput"]
-        udp_throughput = monitor.get_stats(
-            "00:00:00:00:00:00:00:01", 
-            "udp", 
-            "10.0.0.1",
-            "10.0.0.4"
-            )["throughput"]
+        tcp_throughput = monitor.get_stats("00:00:00:00:00:00:00:01", "tcp", "10.0.0.1", "10.0.0.3")["throughput"]
+        #print('tcp throuhgput:  ' , tcp_throughput)
+        udp_throughput = monitor.get_stats("00:00:00:00:00:00:00:01", "udp", "10.0.0.1", "10.0.0.4")["throughput"]
+        #print('udp throuhgput:  ' , udp_throughput)
         if tcp_throughput+udp_throughput >= 95000000 and not switched:
             switchRoute()
             switched = True
 
         time.sleep(1)
+
 
 def switchRoute():
     flow1 = {'switch':"00:00:00:00:00:00:00:01","name":"flow1","cookie":"0",
