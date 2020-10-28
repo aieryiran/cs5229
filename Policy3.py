@@ -81,25 +81,11 @@ def AutoRouting():
 
     while True:
         monitor.update_monitor(flowget)
-        tcp_h2h3 = monitor.get_stats(
-            "00:00:00:00:00:00:00:02", 
-            "tcp", 
-            "10.0.0.2",
-            "10.0.0.3"
-            )["throughput"]
-        udp_h1h4 = monitor.get_stats(
-            "00:00:00:00:00:00:00:01", 
-            "udp", 
-            "10.0.0.1",
-            "10.0.0.4"
-            )["throughput"]
-        udp_h2h5 = monitor.get_stats(
-            "00:00:00:00:00:00:00:02", 
-            "udp", 
-            "10.0.0.2",
-            "10.0.0.5"
-            )["throughput"]
-        if tcp_h2h3+udp_h2h5 >= 95000000 and not switched:
+        H2H3connection = monitor.get_stats("00:00:00:00:00:00:00:02", "10.0.0.2", "10.0.0.3")["throughput"]
+        H2H5connection = monitor.get_stats("00:00:00:00:00:00:00:02", "10.0.0.2", "10.0.0.5")["throughput"]
+        H1H4connection = monitor.get_stats("00:00:00:00:00:00:00:01", "10.0.0.1", "10.0.0.4")["throughput"]
+
+        if H2H3connection+H2H5connection >= 95000000 and not switched:
             switch()
             switched = True
 
@@ -107,22 +93,22 @@ def AutoRouting():
         time.sleep(monitor.update_interval)
 
 def switch():
-    flow1 = {'switch':"00:00:00:00:00:00:00:02","name":"flow1","cookie":"0",
+    S2S1h2h5flow = {'switch':"00:00:00:00:00:00:00:02","name":"S2S1h2h5flow","cookie":"0",
                     "priority":"100","in_port":"1","eth_type":"0x800","ip_proto":"0x11","ipv4_src":"10.0.0.2",
                     "ipv4_dst":"10.0.0.5","active":"true","actions":"output=2"}
-    flow2 = {'switch':"00:00:00:00:00:00:00:01","name":"flow2","cookie":"0",
+    S1S3h2h5flow = {'switch':"00:00:00:00:00:00:00:01","name":"S1S3h2h5flow","cookie":"0",
                     "priority":"100","in_port":"2","eth_type":"0x800","ip_proto":"0x11","ipv4_src":"10.0.0.2",
                     "ipv4_dst":"10.0.0.5","active":"true","actions":"output=3"}
-    flow3 = {'switch':"00:00:00:00:00:00:00:03","name":"flow3","cookie":"0",
+    S3H5h2h5flow = {'switch':"00:00:00:00:00:00:00:03","name":"S3H5h2h5flow","cookie":"0",
                     "priority":"100","in_port":"4","eth_type":"0x800","ip_proto":"0x11","ipv4_src":"10.0.0.2",
                     "ipv4_dst":"10.0.0.5","active":"true","actions":"output=3"}
 
-    pusher.set(flow1)
-    pusher.set(flow2)
-    pusher.set(flow3)
+    pusher.set(S2S1h2h5flow)
+    pusher.set(S1S3h2h5flow)
+    pusher.set(S3H5h2h5flow)
 
 
-def udp():
+"""def udp():
     S1Staticflow1 = {'switch':"00:00:00:00:00:00:00:01","name":"S1h1toh2udp","cookie":"0",
                     "priority":"10","in_port":"1","eth_type":"0x800","ip_proto":"0x11",
                     "ipv4_src":"10.0.0.1","ipv4_dst":"10.0.0.2","active":"true","actions":"output=2"}
@@ -244,6 +230,7 @@ def udp():
     pusher.set(S3Staticflow10)
     pusher.set(S3Staticflow11)
     pusher.set(S3Staticflow12)
+"""
 
 def staticForwarding():
     S1Staticflow1 = {'switch':"00:00:00:00:00:00:00:01","name":"S1h1toh2","cookie":"0",
@@ -371,6 +358,6 @@ def staticForwarding():
 
 if __name__ =='__main__':
     staticForwarding()
-    udp()
+    #udp()
     AutoRouting()
     pass
